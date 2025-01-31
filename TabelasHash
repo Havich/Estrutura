@@ -1,0 +1,80 @@
+def hash_somatorio(s):
+    return sum(ord(c) for c in s)
+
+def hash_polinomial(s, p=31):
+    return sum(ord(c) * (p ** i) for i, c in enumerate(s))
+
+def hash_deslocamento_critico(s):
+    hash_val = 0
+    for c in s:
+        hash_val ^= ord(c)
+        hash_val = ((hash_val << 1) & 0xFFFFFFFF) | (hash_val >> 31)  # Deslocamento circular de 32 bits
+    return hash_val
+
+def compressao_divisao(k, N):
+    return k % N
+
+def compressao_dobra(k, N):
+    str_k = str(abs(k))  # Trabalhar apenas com valores positivos
+    metade = len(str_k) // 2
+    parte1 = int(str_k[:metade] or 0)
+    parte2 = int(str_k[metade:] or 0)
+    return (parte1 + parte2) % N
+
+def compressao_mad(k, a, b, p, N):
+    return ((a * k + b) % p) % N
+
+
+strings = [
+    "apple", "voadora", "banjo", "banana", "cherry", "date", "elderberry", "fig", "grape", "honeydew",
+    "kiwi", "xuru", "runin", "xamã", "mittilho", "lemon", "mango", "nectarine", "orange", "papaya",
+    "quince", "raspberry", "strawberry", "tangerine", "ugli", "voavanga", "maravilha", "IFCE", "maracanad",
+    "ceará", "manga", "rendemption", "bobo", "maluco"
+]
+
+
+N = 32
+
+
+a = 5
+b = 3
+p = 101 
+
+def preencher_tabela_hash(strings, hash_func, compress_func, N, *args):
+    tabela = [None] * N
+    colisoes = 0
+    print(f"\nUsando {hash_func.__name__} + {compress_func.__name__}")
+    for s in strings:
+        hash_val = hash_func(s)
+        comprimido = compress_func(hash_val, *args, N) if compress_func == compressao_mad else compress_func(hash_val, N)
+        if tabela[comprimido] is not None:
+            colisoes += 1
+            print(f"Colisão: {s} ({hash_val}) -> índice {comprimido} já ocupado por {tabela[comprimido]}")
+        else:
+            tabela[comprimido] = s
+    return colisoes
+
+metodos_hash = {
+    "Somatório": hash_somatorio,
+    "Polinomial": hash_polinomial,
+    "Deslocamento Crítico": hash_deslocamento_critico
+}
+
+metodos_compressao = {
+    "Divisão": compressao_divisao,
+    "Dobra": compressao_dobra,
+    "MAD": compressao_mad
+}
+
+resultados = {}
+for nome_hash, hash_func in metodos_hash.items():
+    for nome_compressao, compress_func in metodos_compressao.items():
+        if nome_compressao == "MAD":
+            colisoes = preencher_tabela_hash(strings, hash_func, compress_func, N, a, b, p)
+        else:
+            colisoes = preencher_tabela_hash(strings, hash_func, compress_func, N)
+        resultados[f"{nome_hash} + {nome_compressao}"] = colisoes
+
+print("\nResultados Finais:")
+for metodo, colisoes in resultados.items():
+    print(f"{metodo}: {colisoes} colisões")
