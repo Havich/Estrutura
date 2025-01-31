@@ -8,14 +8,14 @@ def hash_deslocamento_critico(s):
     hash_val = 0
     for c in s:
         hash_val ^= ord(c)
-        hash_val = ((hash_val << 1) & 0xFFFFFFFF) | (hash_val >> 31)  # Deslocamento circular de 32 bits
+        hash_val = ((hash_val << 1) & 0xFFFFFFFF) | (hash_val >> 31)
     return hash_val
 
 def compressao_divisao(k, N):
     return k % N
 
 def compressao_dobra(k, N):
-    str_k = str(abs(k))  # Trabalhar apenas com valores positivos
+    str_k = str(abs(k))
     metade = len(str_k) // 2
     parte1 = int(str_k[:metade] or 0)
     parte2 = int(str_k[metade:] or 0)
